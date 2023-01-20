@@ -5,34 +5,38 @@ cur1 = mycon.cursor()
 
 def main():
     
-    print("1. Add a new subject")
-    print('2. Add Already Existed Subject')
+    print("1. Add a New Subject")
+    print('2. Add a Old Subject')
     print("3. Mark Attendance")
-    print("4. Remove Subject")
-    print("5. Show Attendance")
-    print("6. Exit")
+    print('4. Add OD/ML')
+    print("5. Remove Subject")
+    print("6. Show Attendance")
+    print("7. Exit")
     ch = input("What do you want to do? ")
     print("\n--------------------------------------------\n")
-    
+
     
     if(ch == '1'):
-        s = length(ch)
+        r,s = length()
         add(s)
         
     elif(ch == '2'):
-        s = length('1')
+        s = length()
         addE(s)
 
     elif(ch == '3'):
         pass
-    
+
     elif(ch == '4'):
-        remove()
+        pass
     
     elif(ch == '5'):
-        length(ch)
-       
+        remove()
+    
     elif(ch == '6'):
+        display()
+       
+    elif(ch == '7'):
         print("Have a Nice Day")
         print("\n--------------------------------------------\n")
         return
@@ -43,24 +47,7 @@ def main():
     
     main()
     
-def length(ch):
-    sql = 'select * from att'
-    cur1.execute(sql)
-    result = cur1.fetchall()
 
-    if(ch == '1'):
-        return len(result)
-
-    elif(ch == '5'):
-        if(len(result) == 0):
-            print("No Subject is Added")
-            print("\n--------------------------------------------\n")
-
-        else:
-            keys = ['Serial_NO','Name','Present','Absent','Total','Percentage','Required/Margin']
-            print(tabulate(result, headers = keys, tablefmt = 'pretty',showindex = False))
-            print("\n--------------------------------------------\n")
-            return result
             
 def add(s):
     name = input('Name of your subject: ')
@@ -68,13 +55,56 @@ def add(s):
     data = (s,name,0,0,0,0,0)
     cur1.execute(sql,data)
     mycon.commit()
+
+    sql = 'insert into od values(%s,%s,%s,%s)'
+    data = (s,0,0,0)
+    cur1.execute(sql,data)
+    mycon.commit()
+    
     print("\n--------------------------------------------\n")
     print("Subject Added Succesfully")
     print("\n--------------------------------------------\n")
 
-def remove():
-    result = length('5')
+def addE(s):
+    name = input('Name of your subject: ')
+    print("\n--------------------------------------------\n")
+    try:
+        tot = int(input('Total: '))
+        print("\n--------------------------------------------\n")
+        pre = int(input('Present: '))
+        print("\n--------------------------------------------\n")
+        perc,ab,req = margin(tot,pre)
 
+        od = int(input('Od Hours: '))
+        print("\n--------------------------------------------\n")
+        ml = int(input('ML Hours: '))
+        print("\n--------------------------------------------\n")
+        
+    except:
+        print("\n--------------------------------------------\n")
+        print("Wrong Input")
+        print("\n--------------------------------------------\n")
+        
+    else:   
+        sql = 'insert into att values(%s,%s,%s,%s,%s,%s,%s)'
+        data = (s,name,pre,ab,tot,perc,req)
+        cur1.execute(sql,data)
+        mycon.commit()
+
+
+        perc,ab,req = margin(tot,pre+od+ml)
+        sql = 'insert into od values(%s,%s,%s,%s)'
+        data = (s,od,ml,perc)
+        cur1.execute(sql,data)
+        mycon.commit()
+        
+        print("Subject Added Succesfully")
+        print("\n--------------------------------------------\n")
+        
+def remove():
+    result,s = length()
+    display()
+    
     try:
         ch = int(input("Serial Number of Subject you want to Remove: "))
         print("\n--------------------------------------------\n")
@@ -92,46 +122,53 @@ def remove():
         print("\n--------------------------------------------\n")
 
     else:
-        sql = 'delete from att where serial =' + str(ch)
+        sql = 'delete from att where Serial_no =' + str(ch)
         cur1.execute(sql)
         mycon.commit()
         print('Subject Successfully Removed')
         print("\n--------------------------------------------\n")
 
-def addE(s):
-    name = input('Name of your subject: ')
-    print("\n--------------------------------------------\n")
-    try:
-        tot = int(input('Total: '))
+def display():
+    sql = '''select a.*,o.od_hours,o.ml_hours,o.n_p from att a join od o
+            on a.Serial_no = o.Serial_no'''
+    
+    cur1.execute(sql)
+    result = cur1.fetchall()
+    
+    if(len(result) == 0):
+        print("No Subject is Added")
         print("\n--------------------------------------------\n")
-        pre = int(input('Present: '))
-        print("\n--------------------------------------------\n")
-        perc = (pre/tot)*100
-        perc = round(perc,2)
-        ab = tot-pre
-        req = (ab*4) - tot
 
-    except:
+    else:
+        keys = ['Serial_NO','Name','Present','Absent','Total','Percentage','Required/Margin','OD','ML','Percentage_OD']
+        print(tabulate(result, headers = keys, tablefmt = 'pretty',showindex = False))
         print("\n--------------------------------------------\n")
-        print("Wrong Input")
-        print("\n--------------------------------------------\n")
+        return result
+        
+def length():
+    sql = 'select * from att'
+    cur1.execute(sql)
+    result = cur1.fetchall()
+    return result,len(result)
+
+def margin(tot,pre):
+    perc = (pre/tot)*100
+    perc = round(perc,2)
+    ab = tot-pre
+    req = (ab*4) - tot
+
+    if(req < 0):
+        i = 0
+        while((ab+i)*4 < tot+i):
+            i+=1  
+        req = i
         
     else:
-        if(req < 0):
-            i = 0
-            while((ab+i)*4 < tot+i):
-                i+=1
-                
-            req = i
-                
-        sql = 'insert into att values(%s,%s,%s,%s,%s,%s,%s)'
-        data = (s,name,pre,ab,tot,perc,req)
-        cur1.execute(sql,data)
-        mycon.commit()
-        print("Subject Added Succesfully")
-        print("\n--------------------------------------------\n")
+        req = -1*req
 
-    
+    return perc,ab,req
+
+
 if(__name__ == '__main__'):
     print("\n--------------------------------------------\n")
     main()
