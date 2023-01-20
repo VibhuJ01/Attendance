@@ -1,4 +1,7 @@
 from tabulate import tabulate
+
+from mark import mark
+
 import mysql.connector as ms
 mycon = ms.connect(host="localhost",user="root",db="attendance",passwd="vibhu")
 cur1 = mycon.cursor()
@@ -21,11 +24,18 @@ def main():
         add(s)
         
     elif(ch == '2'):
-        s = length()
+        r,s = length()
         addE(s)
 
     elif(ch == '3'):
-        pass
+        do = input("Enter Day Order : ")
+        print("\n--------------------------------------------\n")
+        if(do >= '1' and do <= '5'): 
+            mark(int(do))
+
+        else:
+            print('Wrong Input')
+            print("\n--------------------------------------------\n")
 
     elif(ch == '4'):
         pass
@@ -55,7 +65,7 @@ def add(s):
     data = (s,name,0,0,0,0,0)
     cur1.execute(sql,data)
     mycon.commit()
-
+    
     sql = 'insert into od values(%s,%s,%s,%s)'
     data = (s,0,0,0)
     cur1.execute(sql,data)
@@ -70,13 +80,11 @@ def addE(s):
     print("\n--------------------------------------------\n")
     try:
         tot = int(input('Total: '))
-        print("\n--------------------------------------------\n")
         pre = int(input('Present: '))
         print("\n--------------------------------------------\n")
         perc,ab,req = margin(tot,pre)
 
         od = int(input('Od Hours: '))
-        print("\n--------------------------------------------\n")
         ml = int(input('ML Hours: '))
         print("\n--------------------------------------------\n")
         
@@ -87,14 +95,14 @@ def addE(s):
         
     else:   
         sql = 'insert into att values(%s,%s,%s,%s,%s,%s,%s)'
-        data = (s,name,pre,ab,tot,perc,req)
+        data = [s,name,pre,ab,tot,perc,req]
         cur1.execute(sql,data)
         mycon.commit()
 
 
         perc,ab,req = margin(tot,pre+od+ml)
         sql = 'insert into od values(%s,%s,%s,%s)'
-        data = (s,od,ml,perc)
+        data = [s,od,ml,perc]
         cur1.execute(sql,data)
         mycon.commit()
         
@@ -155,7 +163,12 @@ def margin(tot,pre):
     perc = (pre/tot)*100
     perc = round(perc,2)
     ab = tot-pre
-    req = (ab*4) - tot
+
+    if(perc == 100):
+        req = 0
+
+    else:
+        req = (ab*4) - tot
 
     if(req < 0):
         i = 0

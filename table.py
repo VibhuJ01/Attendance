@@ -11,7 +11,7 @@ def att():
     present int,
     absent int,
     total int,
-    percentage decimal(4,2),
+    percentage decimal(5,2),
     req_margin int)'''
 
     cur1.execute(sql)
@@ -37,11 +37,13 @@ def od():
             Serial_no int primary key,
             od_hours int,
             ml_hours int,
-            n_p decimal(4,2)
+            n_p decimal(5,2)
             );'''
     cur1.execute(sql)
     mycon.commit()     
 
 
 att()
+od()
+od_det()
 mycon.close()
