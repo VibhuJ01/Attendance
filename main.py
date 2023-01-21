@@ -1,6 +1,4 @@
-from tabulate import tabulate
-
-from mark import mark
+from mark import mark,margin,display
 
 import mysql.connector as ms
 mycon = ms.connect(host="localhost",user="root",db="attendance",passwd="vibhu")
@@ -136,50 +134,13 @@ def remove():
         print('Subject Successfully Removed')
         print("\n--------------------------------------------\n")
 
-def display():
-    sql = '''select a.*,o.od_hours,o.ml_hours,o.n_p from att a join od o
-            on a.Serial_no = o.Serial_no'''
-    
-    cur1.execute(sql)
-    result = cur1.fetchall()
-    
-    if(len(result) == 0):
-        print("No Subject is Added")
-        print("\n--------------------------------------------\n")
 
-    else:
-        keys = ['Serial_NO','Name','Present','Absent','Total','Percentage','Required/Margin','OD','ML','Percentage_OD']
-        print(tabulate(result, headers = keys, tablefmt = 'pretty',showindex = False))
-        print("\n--------------------------------------------\n")
-        return result
         
 def length():
     sql = 'select * from att'
     cur1.execute(sql)
     result = cur1.fetchall()
     return result,len(result)
-
-def margin(tot,pre):
-    perc = (pre/tot)*100
-    perc = round(perc,2)
-    ab = tot-pre
-
-    if(perc == 100):
-        req = 0
-
-    else:
-        req = (ab*4) - tot
-
-    if(req < 0):
-        i = 0
-        while((ab+i)*4 < tot+i):
-            i+=1  
-        req = i
-        
-    else:
-        req = -1*req
-
-    return perc,ab,req
 
 
 if(__name__ == '__main__'):
