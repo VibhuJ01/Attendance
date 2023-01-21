@@ -26,14 +26,7 @@ def main():
         addE(s)
 
     elif(ch == '3'):
-        do = input("Enter Day Order : ")
-        print("\n--------------------------------------------\n")
-        if(do >= '1' and do <= '5'): 
-            mark(int(do))
-
-        else:
-            print('Wrong Input')
-            print("\n--------------------------------------------\n")
+        mark()
 
     elif(ch == '4'):
         pass
@@ -58,17 +51,18 @@ def main():
 
             
 def add(s):
+#--------------------------------------------
     name = input('Name of your subject: ')
     sql = 'insert into att values(%s,%s,%s,%s,%s,%s,%s)'
     data = (s,name,0,0,0,0,0)
     cur1.execute(sql,data)
     mycon.commit()
-    
+#--------------------------------------------    
     sql = 'insert into od values(%s,%s,%s,%s)'
     data = (s,0,0,0)
     cur1.execute(sql,data)
     mycon.commit()
-    
+#--------------------------------------------    
     print("\n--------------------------------------------\n")
     print("Subject Added Succesfully")
     print("\n--------------------------------------------\n")
@@ -91,19 +85,19 @@ def addE(s):
         print("Wrong Input")
         print("\n--------------------------------------------\n")
         
-    else:   
+    else:
+#--------------------------------------------
         sql = 'insert into att values(%s,%s,%s,%s,%s,%s,%s)'
         data = [s,name,pre,ab,tot,perc,req]
         cur1.execute(sql,data)
         mycon.commit()
-
-
+#--------------------------------------------
         perc,ab,req = margin(tot,pre+od+ml)
         sql = 'insert into od values(%s,%s,%s,%s)'
         data = [s,od,ml,perc]
         cur1.execute(sql,data)
         mycon.commit()
-        
+#--------------------------------------------        
         print("Subject Added Succesfully")
         print("\n--------------------------------------------\n")
         

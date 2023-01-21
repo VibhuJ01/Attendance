@@ -5,8 +5,8 @@ mycon = ms.connect(host="localhost",user="root",db="attendance",passwd="vibhu")
 cur1 = mycon.cursor()
 
 
-def mark(do):
-    l=[
+def mark():
+    timetable=[
         ['RL_Lab','RL_Lab','RL','ISPA','Eco_Impact','Eco_Impact','Design_of_AI'],
         ['Cognitive_Science','Cognitive_Science','Design_of_AI','Design_of_AI','ISPA'],
         ['Design_of_AI_lab','Design_of_AI_lab','Text_Analysis ','RL','Maths'],
@@ -24,43 +24,76 @@ def mark(do):
 
     if(ch == 4):
         return
-    
-    dict = {}
-    for i in range(len(l[do-1])):
-        if l[do-1][i] in dict:
-            dict[l[do-1][i]]+=1
-            
-        else:
-            dict[l[do-1][i]]=1
-       
+
+#--------------------------------------------     
     sql = 'select * from att'
     cur1.execute(sql)
     result = cur1.fetchall()
     l = len(result)
-    
-    hours =  list(dict.values())
-    name = list(dict.keys())  
+#--------------------------------------------
+    if(ch == 3):
+        ans = 'y'
+        while(ans.lower() == 'y'):
+            display()
+            s = int(input('Enter Serial Number: '))
+            print("\n--------------------------------------------\n")
+            print('Enter Number of Hours in -ve for absent')
+            print("\n--------------------------------------------\n")
+            h = int(input('Enter Number of Hours: '))
+
+            if(h>=0):
+                present(result[s][2]+h,result[s][4]+h,result[s][1],result[s][0])
+
+            else:
+                h = -1*h
+                absent(result[s][2],result[s][4]+h,result[s][1],result[s][0])
+            print("\n--------------------------------------------\n")
+            print("Attendance Update Successfully")
+            print("\n--------------------------------------------\n")
+            display()
+            ans = input('Do you want to Continue(y/n): ')
+            print("\n--------------------------------------------\n")
+            
+        return
+#--------------------------------------------
+    do = input("Enter Day Order : ")
+    do = int(do)
+    print("\n--------------------------------------------\n")
+    if(do >= 1 and do <= 5):
+        dict = {}
+        for i in range(len(timetable[do-1])):
+            if timetable[do-1][i] in dict:
+                dict[timetable[do-1][i]]+=1
+                
+            else:
+                dict[timetable[do-1][i]]=1
+
+        hours =  list(dict.values())
+        name = list(dict.keys())
+        
+    else:
+        print("Wrong Input")
+        print("\n--------------------------------------------\n")
+        return
+#--------------------------------------------
+     
     if(ch == 1):
-        present(hours,name,result,l)
+        
+        marking(hours,name,result,l,0)
         print('Present Successfully Marked')
         print("\n--------------------------------------------\n")
         display()
                     
     elif(ch == 2):
-        absent(hours,name,result,l)
+        marking(hours,name,result,l,1)
         print('Absent Successfully Marked')
         print("\n--------------------------------------------\n")
         display()
     
-    elif(ch == 3):
-        for i in dict.keys():
-            print(i, end = ' ')
-        
-        sub = input("Choose subject from the given list ")
-        hrs = dict[sub]
+    
 
     else:
-        print("wrong Input")
+        print("Wrong Input")
         print("\n--------------------------------------------\n")
                 
 ##    except:
@@ -69,45 +102,48 @@ def mark(do):
 ##        print("\n--------------------------------------------\n")
 
 
-def present(hours,name,result,l):
+def marking(hours,name,result,l,n):
     for i in range(l):
         for j in range(len(name)):
             if(result[i][1] == name[j]):
                 tot = hours[j] + result[i][4]
-                pre = hours[j] + result[i][2]
-                perc,ab,req = margin(tot,pre)
+                
+                if(n == 0):
+                    pre = result[i][2] + hours[j]
+                    present(pre,tot,name[j],result[i][0])
 
-                sql = '''update att
-                         set present = %s,
-                         total = %s,
-                         percentage = %s,
-                         req_margin = %s
-                         where sub_name = %s
-                      '''
-                data = [pre,tot,perc,req,name[j]]
-                cur1.execute(sql,data)
-                mycon.commit()
-                update_od(result[i][0],pre,tot)
+                else:
+                    pre = result[i][2]
+                    absent(pre,tot,name[j],result[i][0])
+                
+                
+def present(pre,tot,sub,n):
+    perc,ab,req = margin(tot,pre)
+    sql = '''update att
+             set present = %s,
+             total = %s,
+             percentage = %s,
+             req_margin = %s
+             where sub_name = %s
+          '''
+    data = [pre,tot,perc,req,sub]
+    cur1.execute(sql,data)
+    mycon.commit()
+    update_od(n,pre,tot)
 
-def absent(hours,name,result,l):
-    for i in range(l):
-        for j in range(len(name)):
-            if(result[i][1] == name[j]):
-                tot = hours[j] + result[i][4]
-                pre = result[i][2]
-                perc,ab,req = margin(tot,pre)
-
-                sql = '''update att
-                         set absent = %s,
-                         total = %s,
-                         percentage = %s,
-                         req_margin = %s
-                         where sub_name = %s
-                      '''
-                data = [ab,tot,perc,req,name[j]]
-                cur1.execute(sql,data)
-                mycon.commit()
-                update_od(result[i][0],pre,tot)
+def absent(pre,tot,sub,n):
+    perc,ab,req = margin(tot,pre)
+    sql = '''update att
+             set absent = %s,
+             total = %s,
+             percentage = %s,
+             req_margin = %s
+             where sub_name = %s
+          '''
+    data = [ab,tot,perc,req,sub]
+    cur1.execute(sql,data)
+    mycon.commit()
+    update_od(n,pre,tot)
                 
 def update_od(s,pre,tot):
     sql = 'select * from od'
