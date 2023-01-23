@@ -9,97 +9,103 @@ def mark():
     timetable=[
         ['RL_Lab','RL_Lab','RL','ISPA','Eco_Impact','Eco_Impact','Design_of_AI'],
         ['Cognitive_Science','Cognitive_Science','Design_of_AI','Design_of_AI','ISPA'],
-        ['Design_of_AI_lab','Design_of_AI_lab','Text_Analysis ','RL','Maths'],
-        ['Maths','Maths','Cognitive_Science','Text_Analysis '],
-        ['ESP','ESP','Text_Analysis ','Eco_Impact','Maths']
+        ['Design_of_AI_lab','Design_of_AI_lab','Text_Analysis','Text_Analysis','RL','Maths'],
+        ['Maths','Maths','Cognitive_Science','Text_Analysis'],
+        ['ESP','ESP','Eco_Impact','Maths']
       ]
 
-##    try:
-    print("1. Present All Day")
-    print("2. Absent All Day")
-    print("3. Custom Marking")
-    print('4. Back')
-    ch = int(input("Enter your choice : "))
-    print("\n--------------------------------------------\n")
+    try:
+        print("1. Present All Day")
+        print("2. Absent All Day")
+        print("3. Custom Marking")
+        print('4. Back')
+        ch = int(input("Enter your choice : "))
+        print("\n--------------------------------------------\n")
 
-    if(ch == 4):
-        return
+        if(ch == 4):
+            return
 
-#--------------------------------------------     
-    sql = 'select * from att'
-    cur1.execute(sql)
-    result = cur1.fetchall()
-    l = len(result)
-#--------------------------------------------
-    if(ch == 3):
-        ans = 'y'
-        while(ans.lower() == 'y'):
-            display()
-            s = int(input('Enter Serial Number: '))
-            print("\n--------------------------------------------\n")
-            print('Enter Number of Hours in -ve for absent')
-            print("\n--------------------------------------------\n")
-            h = int(input('Enter Number of Hours: '))
+    #--------------------------------------------
+        
+        sql = 'select * from att'
+        cur1.execute(sql)
+        result = cur1.fetchall()
+        l = len(result)
+        
+    #--------------------------------------------
+        
+        if(ch == 3):
+            ans = 'y'
+            while(ans.lower() == 'y'):
+                display()
+                s = int(input('Enter Serial Number: '))
+                print("\n--------------------------------------------\n")
+                print('Enter Number of Hours in -ve for absent')
+                print("\n--------------------------------------------\n")
+                h = int(input('Enter Number of Hours: '))
 
-            if(h>=0):
-                present(result[s][2]+h,result[s][4]+h,result[s][1],result[s][0])
+                if(h>=0):
+                    present(result[s][2]+h,result[s][4]+h,result[s][1],result[s][0])
 
-            else:
-                h = -1*h
-                absent(result[s][2],result[s][4]+h,result[s][1],result[s][0])
-            print("\n--------------------------------------------\n")
-            print("Attendance Update Successfully")
-            print("\n--------------------------------------------\n")
-            display()
-            ans = input('Do you want to Continue(y/n): ')
-            print("\n--------------------------------------------\n")
-            
-        return
-#--------------------------------------------
-    do = input("Enter Day Order : ")
-    do = int(do)
-    print("\n--------------------------------------------\n")
-    if(do >= 1 and do <= 5):
-        dict = {}
-        for i in range(len(timetable[do-1])):
-            if timetable[do-1][i] in dict:
-                dict[timetable[do-1][i]]+=1
+                else:
+                    h = -1*h
+                    absent(result[s][2],result[s][4]+h,result[s][1],result[s][0])
+                print("\n--------------------------------------------\n")
+                print("Attendance Update Successfully")
+                print("\n--------------------------------------------\n")
+                display()
+                ans = input('Do you want to Continue(y/n): ')
+                print("\n--------------------------------------------\n")
                 
-            else:
-                dict[timetable[do-1][i]]=1
-
-        hours =  list(dict.values())
-        name = list(dict.keys())
+            return
         
-    else:
-        print("Wrong Input")
-        print("\n--------------------------------------------\n")
-        return
-#--------------------------------------------
-     
-    if(ch == 1):
+    #--------------------------------------------
         
-        marking(hours,name,result,l,0)
-        print('Present Successfully Marked')
+        do = input("Enter Day Order : ")
+        do = int(do)
         print("\n--------------------------------------------\n")
-        display()
+        if(do >= 1 and do <= 5):
+            dict = {}
+            for i in range(len(timetable[do-1])):
+                if timetable[do-1][i] in dict:
+                    dict[timetable[do-1][i]]+=1
                     
-    elif(ch == 2):
-        marking(hours,name,result,l,1)
-        print('Absent Successfully Marked')
-        print("\n--------------------------------------------\n")
-        display()
-    
-    
+                else:
+                    dict[timetable[do-1][i]]=1
 
-    else:
+            hours =  list(dict.values())
+            name = list(dict.keys())
+            
+        else:
+            print("Wrong Input")
+            print("\n--------------------------------------------\n")
+            return
+        
+    #--------------------------------------------
+         
+        if(ch == 1):
+            
+            marking(hours,name,result,l,0)
+            print('Present Successfully Marked')
+            print("\n--------------------------------------------\n")
+            display()
+                        
+        elif(ch == 2):
+            marking(hours,name,result,l,1)
+            print('Absent Successfully Marked')
+            print("\n--------------------------------------------\n")
+            display()
+        
+        
+
+        else:
+            print("Wrong Input")
+            print("\n--------------------------------------------\n")
+                
+    except:
+        print("\n--------------------------------------------\n")
         print("Wrong Input")
         print("\n--------------------------------------------\n")
-                
-##    except:
-##        print("\n--------------------------------------------\n")
-##        print("Wrong Input")
-##        print("\n--------------------------------------------\n")
 
 
 def marking(hours,name,result,l,n):
@@ -152,7 +158,8 @@ def update_od(s,pre,tot):
 
     for i in result:
         if(i[0] == s):
-            perc,ab,req = margin(tot,pre+i[1]+i[2])
+            
+            perc,ab,req = margin(tot,pre+int(i[2])+int(i[3]))
             sql = '''update od
                      set n_p = %s
                      where serial_no = %s
@@ -199,3 +206,97 @@ def margin(tot,pre):
         req = -1*req
 
     return perc,ab,req
+
+def length():
+    sql = 'select * from att'
+    cur1.execute(sql)
+    result = cur1.fetchall()
+    return result,len(result)
+
+            
+def add(s):
+#--------------------------------------------
+    name = input('Name of your subject: ')
+    sql = 'insert into att values(%s,%s,%s,%s,%s,%s,%s)'
+    data = (s,name,0,0,0,0,0)
+    cur1.execute(sql,data)
+    mycon.commit()
+#--------------------------------------------    
+    sql = 'insert into od values(%s,%s,%s,%s,%s)'
+    data = (s,name,0,0,0)
+    cur1.execute(sql,data)
+    mycon.commit()
+#--------------------------------------------    
+    print("\n--------------------------------------------\n")
+    print("Subject Added Succesfully")
+    print("\n--------------------------------------------\n")
+
+def addE(s):
+    name = input('Name of your subject: ')
+    print("\n--------------------------------------------\n")
+    try:
+        tot = int(input('Total: '))
+        pre = int(input('Present: '))
+        print("\n--------------------------------------------\n")
+        perc,ab,req = margin(tot,pre)
+
+        od = int(input('Od Hours: '))
+        ml = int(input('ML Hours: '))
+        print("\n--------------------------------------------\n")
+        
+    except:
+        print("\n--------------------------------------------\n")
+        print("Wrong Input")
+        print("\n--------------------------------------------\n")
+        
+    else:
+#--------------------------------------------
+        sql = 'insert into att values(%s,%s,%s,%s,%s,%s,%s)'
+        data = [s,name,pre,ab,tot,perc,req]
+        cur1.execute(sql,data)
+        mycon.commit()
+#--------------------------------------------
+        perc,ab,req = margin(tot,pre+od+ml)
+        sql = 'insert into od values(%s,%s,%s,%s,%s)'
+        data = [s,name,od,ml,perc]
+        cur1.execute(sql,data)
+        mycon.commit()
+#--------------------------------------------        
+        print("Subject Added Succesfully")
+        print("\n--------------------------------------------\n")
+        
+def remove():
+    result,s = length()
+    display()
+
+    if(s == 0):
+        return
+    
+    try:
+        ch = int(input("Serial Number of Subject you want to Remove: "))
+        print("\n--------------------------------------------\n")
+        for i in result:
+            if(i[0] == ch):
+                break
+        else:
+            print('Serial Number is not Present')
+            print("\n--------------------------------------------\n")
+            return
+
+    except:
+        print("\n--------------------------------------------\n")
+        print("Wrong Input")
+        print("\n--------------------------------------------\n")
+
+    else:
+        sql = 'delete from att where Serial_no =' + str(ch)
+        cur1.execute(sql)
+        mycon.commit()
+
+        sql = 'delete from od where Serial_no =' + str(ch)
+        cur1.execute(sql)
+        mycon.commit()
+        print('Subject Successfully Removed')
+        print("\n--------------------------------------------\n")
+
+
