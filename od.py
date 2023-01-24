@@ -55,12 +55,12 @@ def marking(od,l):
 
         if(od == 'OD'):
             sql = '''update od
-                     set od_hours = %s
+                     set od_hours = od_hours + %s
                      where serial_no = %s
                      '''
         else:
             sql = '''update od
-                     set ml_hours = %s
+                     set ml_hours = ml_hours + %s
                      where serial_no = %s
                      '''
         
@@ -68,9 +68,8 @@ def marking(od,l):
         cur1.execute(sql,data)
         mycon.commit()
 
-        sql = 'select * from att where serial_no = %s'
-        data = [s]
-        cur1.execute(sql,data)
+        sql = 'select * from att'
+        cur1.execute(sql)
         result = cur1.fetchall()
 
         update_od(s,result[s][2],result[s][4])

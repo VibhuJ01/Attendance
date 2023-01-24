@@ -7,7 +7,7 @@ cur1 = mycon.cursor()
 
 def mark():
     timetable=[
-        ['RL_Lab','RL_Lab','RL','ISPA','Eco_Impact','Eco_Impact','Design_of_AI'],
+        ['RL_Lab','RL_Lab','RL','ISPA','Eco_Impact','Eco_Impact'],
         ['Cognitive_Science','Cognitive_Science','Design_of_AI','Design_of_AI','ISPA'],
         ['Design_of_AI_lab','Design_of_AI_lab','Text_Analysis','Text_Analysis','RL','Maths'],
         ['Maths','Maths','Cognitive_Science','Text_Analysis'],
